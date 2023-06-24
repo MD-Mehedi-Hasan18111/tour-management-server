@@ -7,6 +7,7 @@ type IName = {
 }
 
 export type IAdmin = {
+  _id: string
   phoneNumber: string
   role: 'admin'
   password: string
@@ -20,12 +21,12 @@ export type IAdminCredential = {
 }
 
 type IAdminMethods = {
-  // isAdminExist(phoneNumber: string): Promise<Partial<IAdmin | null>>
+  isAdminExist(phoneNumber: string): Promise<Partial<IAdmin | null>>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  isAdminExist(phoneNumber: string): any
+  // isAdminExist(phoneNumber: string): any
   isPasswordMatched(
     givenPassword: string,
-    savedPassword: string
+    savedPassword: string | undefined
   ): Promise<boolean>
 }
 
