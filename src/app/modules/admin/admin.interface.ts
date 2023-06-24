@@ -21,9 +21,7 @@ export type IAdminCredential = {
 }
 
 type IAdminMethods = {
-  isAdminExist(phoneNumber: string): Promise<Partial<IAdmin | null>>
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  // isAdminExist(phoneNumber: string): any
+  isUserExist(phoneNumber: string): Promise<Partial<IAdmin | null>>
   isPasswordMatched(
     givenPassword: string,
     savedPassword: string | undefined

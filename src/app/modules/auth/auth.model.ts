@@ -31,6 +31,24 @@ const userSchema = new Schema<IUser>(
   }
 )
 
+// instance methods
+userSchema.methods.isUserExist = async function (
+  phoneNumber: string
+): Promise<Partial<IUser | null>> {
+  const user = await User.findOne(
+    { phoneNumber },
+    { _id: 1, phoneNumber: 1, password: 1, role: 1 }
+  )
+  return user
+}
+
+userSchema.methods.isPasswordMatched = async function (
+  givenPassword: string,
+  savedPassword: string
+): Promise<boolean> {
+  return await bcrypt.compare(givenPassword, savedPassword)
+}
+
 userSchema.pre('save', async function (next) {
   // hashing password
   this.password = await bcrypt.hash(
