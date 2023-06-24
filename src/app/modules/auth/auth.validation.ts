@@ -21,14 +21,21 @@ const createUserZodSchema = z.object({
   }),
 })
 
-export const loginUserZodSchema = z.object({
+const loginUserZodSchema = z.object({
   body: z.object({
     phoneNumber: z.string({ required_error: 'Phone number is required' }),
     password: z.string({ required_error: 'Password is required' }),
   }),
 })
 
+const newTokenZodSchema = z.object({
+  cookies: z.object({
+    refreshToken: z.string({ required_error: 'refresh token is required' }),
+  }),
+})
+
 export const authValidation = {
   createUserZodSchema,
   loginUserZodSchema,
+  newTokenZodSchema,
 }

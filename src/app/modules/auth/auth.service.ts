@@ -1,15 +1,18 @@
-import httpStatus from "http-status"
-import User from "./auth.model"
-import ApiError from "../../../errors/ApiError"
-import { IUser, IUserCredential } from "./auth.interface"
-import { Secret } from "jsonwebtoken"
-import config from "../../../config"
-import { CreateToken } from "../../../helpers/jwtTokenHelper"
-
+import httpStatus from 'http-status'
+import User from './auth.model'
+import ApiError from '../../../errors/ApiError'
+import { IUser, IUserCredential } from './auth.interface'
+import { Secret } from 'jsonwebtoken'
+import config from '../../../config'
+import { CreateToken, verifyToken } from '../../../helpers/jwtTokenHelper'
 
 export const createUser = async (userData: IUser): Promise<IUser | null> => {
   // check budget and income with role
-  if (userData.role == 'buyer' && (!userData.budget || userData.budget) && userData.income > 0) {
+  if (
+    userData.role == 'buyer' &&
+    (!userData.budget || userData.budget) &&
+    userData.income > 0
+  ) {
     throw new ApiError(
       httpStatus.BAD_REQUEST,
       'Invalid Buyer Data, Required Budget! Income not allowed for Buyer'
@@ -56,10 +59,7 @@ export const loginUser = async (payload: IUserCredential) => {
   }
 
   // password if not matched
-  const isMatched = await user.isPasswordMatched(
-    password,
-    isUserExist.password
-  )
+  const isMatched = await user.isPasswordMatched(password, isUserExist.password)
   if (isUserExist.password && !isMatched) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Password is incorrect')
   }
@@ -80,5 +80,34 @@ export const loginUser = async (payload: IUserCredential) => {
   return {
     accessToken: accessToken,
     refreshToken: refreshToken,
+  }
+}
+
+export const newTokenGenerate = async (token: string) => {
+  let verifiedToken = null
+  try {
+    verifiedToken = verifyToken(token, config.jwt.jwt_refresh_secret as Secret)
+  } catch (error) {
+    throw new ApiError(httpStatus.FORBIDDEN, 'Invalid Refresh Token')
+  }
+
+  const { id } = verifiedToken
+
+  const isUserExist = await User.findById(id)
+  if (!isUserExist) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'User does not exist')
+  }
+
+  // generate new access token
+  const newAccessToken = CreateToken(
+    {
+      id: isUserExist._id,
+      role: isUserExist.role,
+    },
+    config.jwt.jwt_secret as Secret,
+    config.jwt.jwt_expires_in as string
+  )
+  return {
+    accessToken: newAccessToken,
   }
 }

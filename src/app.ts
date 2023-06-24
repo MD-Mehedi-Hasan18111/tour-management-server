@@ -4,10 +4,12 @@ import cors from 'cors'
 import globalErrorHandler from './middlewares/globalErrorHandler'
 import routes from './routes/index'
 import httpStatus from 'http-status'
+import cookieParser from 'cookie-parser'
 
 app.use(cors())
 
 // parser
+app.use(cookieParser())
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
