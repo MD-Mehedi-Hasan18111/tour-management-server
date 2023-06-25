@@ -10,6 +10,10 @@ import {
   getOneCow,
   updateCow,
 } from './cow.service'
+import { verifyToken } from '../../../helpers/jwtTokenHelper'
+import config from '../../../config'
+import { Secret } from 'jsonwebtoken'
+import ApiError from '../../../errors/ApiError'
 
 export const CreateCow: RequestHandler = async (req, res, next) => {
   try {
@@ -67,9 +71,14 @@ export const GetSingleCow: RequestHandler = async (req, res, next) => {
 
 export const UpdateCow: RequestHandler = async (req, res, next) => {
   try {
-    const id = req.params.id
+    const cowid = req.params.id
+    const authToken = req.headers.authorization
+    if (!authToken) {
+      throw new ApiError(httpStatus.FORBIDDEN, 'You are not authorized')
+    }
+    const verifiedUser = verifyToken(authToken, config.jwt.jwt_secret as Secret)
     const data = req.body
-    const result = await updateCow(id, data)
+    const result = await updateCow(cowid, verifiedUser, data)
     sendResponse(res, {
       statusCode: httpStatus.OK,
       success: true,
@@ -84,7 +93,12 @@ export const UpdateCow: RequestHandler = async (req, res, next) => {
 export const DeleteCow: RequestHandler = async (req, res, next) => {
   try {
     const id = req.params.id
-    const result = await deleteCow(id)
+    const authToken = req.headers.authorization
+    if (!authToken) {
+      throw new ApiError(httpStatus.FORBIDDEN, 'You are not authorized')
+    }
+    const verifiedUser = verifyToken(authToken, config.jwt.jwt_secret as Secret)
+    const result = await deleteCow(id, verifiedUser)
     sendResponse(res, {
       statusCode: httpStatus.OK,
       success: true,

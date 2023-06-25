@@ -7,6 +7,7 @@ import { ICow, ICowFilter, IGenericResponse } from './cow.interface'
 import { IPagination } from './cow.pagination'
 import { searchAbleFiltersFields } from './cow.constants'
 import User from '../auth/auth.model'
+import { JwtPayload } from 'jsonwebtoken'
 
 export const createCow = async (cowData: ICow): Promise<ICow | null> => {
   const FoundSeller = await User.findOne({
@@ -103,9 +104,10 @@ export const getOneCow = async (id: string): Promise<ICow | null> => {
 
 export const updateCow = async (
   id: string,
+  verifiedUser: JwtPayload,
   payload: Partial<ICow>
 ): Promise<ICow | null> => {
-  const isExist = await Cow.findOne({ _id: id })
+  const isExist = await Cow.findOne({ _id: id, seller: verifiedUser?.id })
 
   if (!isExist) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Cow could not found')
@@ -118,8 +120,8 @@ export const updateCow = async (
   return result
 }
 
-export const deleteCow = async (id: string): Promise<ICow | null> => {
-  const isFoundCow = await Cow.findOne({ _id: id })
+export const deleteCow = async (id: string, verifiedUser: JwtPayload): Promise<ICow | null> => {
+  const isFoundCow = await Cow.findOne({ _id: id, seller: verifiedUser?.id })
   if (!isFoundCow) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Cow could not found')
   }
