@@ -4,6 +4,7 @@ import { userValidation } from './user.validation'
 import {
   DeleteUser,
   GetAllUsers,
+  GetMyProfileInfo,
   GetSingleUser,
   UpdateUsers,
 } from './users.controller'
@@ -11,6 +12,8 @@ import { authorization } from '../../../middlewares/authorization'
 import { ENUM_USER_ROLE } from '../../../enums/userRole'
 
 const router = express.Router()
+
+router.get('/my-profile', GetMyProfileInfo)
 
 router.patch(
   '/:id',

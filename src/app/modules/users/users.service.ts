@@ -2,6 +2,7 @@ import httpStatus from 'http-status'
 import ApiError from '../../../errors/ApiError'
 import { IUser } from '../auth/auth.interface'
 import User from '../auth/auth.model'
+import { JwtPayload } from 'jsonwebtoken'
 
 export const getAllUsers = async (): Promise<IUser[]> => {
   const users = await User.find({}).sort({ createdAt: -1 })
@@ -42,4 +43,11 @@ export const updateUser = async (
 export const deleteUser = async (id: string): Promise<IUser | null> => {
   const result = await User.findByIdAndDelete(id)
   return result
+}
+
+export const getUserProfileInfo = async (
+  user: JwtPayload
+): Promise<IUser | null> => {
+  const userInfo = await User.findOne({ _id: user?.id, role: user?.role })
+  return userInfo
 }

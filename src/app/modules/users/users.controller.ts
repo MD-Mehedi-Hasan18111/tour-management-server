@@ -5,8 +5,13 @@ import {
   deleteUser,
   getAllUsers,
   getSingleUser,
+  getUserProfileInfo,
   updateUser,
 } from './users.service'
+import ApiError from '../../../errors/ApiError'
+import { verifyToken } from '../../../helpers/jwtTokenHelper'
+import config from '../../../config'
+import { Secret } from 'jsonwebtoken'
 
 export const GetAllUsers: RequestHandler = async (req, res, next) => {
   try {
@@ -61,6 +66,25 @@ export const DeleteUser: RequestHandler = async (req, res, next) => {
       statusCode: httpStatus.OK,
       success: true,
       message: 'User deleted successfully',
+      data: result,
+    })
+  } catch (error) {
+    next()
+  }
+}
+
+export const GetMyProfileInfo: RequestHandler = async (req, res, next) => {
+  try {
+    const token = req.headers.authorization;
+    if(!token){
+      throw new ApiError(httpStatus.FORBIDDEN, "You are not authorized")
+    }
+    const verifiedUser = verifyToken(token, config.jwt.jwt_secret as Secret);
+    const result = await getUserProfileInfo(verifiedUser)
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: 'Profile Info retrieved successfully',
       data: result,
     })
   } catch (error) {
