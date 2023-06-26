@@ -7,6 +7,7 @@ import {
   getSingleUser,
   getUserProfileInfo,
   updateUser,
+  updateUserProfileInfo,
 } from './users.service'
 import ApiError from '../../../errors/ApiError'
 import { verifyToken } from '../../../helpers/jwtTokenHelper'
@@ -75,16 +76,39 @@ export const DeleteUser: RequestHandler = async (req, res, next) => {
 
 export const GetMyProfileInfo: RequestHandler = async (req, res, next) => {
   try {
-    const token = req.headers.authorization;
-    if(!token){
-      throw new ApiError(httpStatus.FORBIDDEN, "You are not authorized")
+    const token = req.headers.authorization
+    if (!token) {
+      throw new ApiError(httpStatus.FORBIDDEN, 'You are not authorized')
     }
-    const verifiedUser = verifyToken(token, config.jwt.jwt_secret as Secret);
+    const verifiedUser = verifyToken(token, config.jwt.jwt_secret as Secret)
     const result = await getUserProfileInfo(verifiedUser)
     sendResponse(res, {
       statusCode: httpStatus.OK,
       success: true,
       message: 'Profile Info retrieved successfully',
+      data: result,
+    })
+  } catch (error) {
+    next()
+  }
+}
+
+export const UpdateMyProfileInfo: RequestHandler = async (req, res, next) => {
+  try {
+    const data = req.body
+    const token = req.headers.authorization
+    if (!token) {
+      throw new ApiError(
+        httpStatus.FORBIDDEN,
+        'You are not authorized for get info'
+      )
+    }
+    const verifiedUser = verifyToken(token, config.jwt.jwt_secret as Secret)
+    const result = await updateUserProfileInfo(data, verifiedUser)
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: 'Profile Info updated successfully',
       data: result,
     })
   } catch (error) {
