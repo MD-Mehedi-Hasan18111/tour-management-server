@@ -21,7 +21,7 @@ export type IAdminCredential = {
 }
 
 type IAdminMethods = {
-  isUserExist(phoneNumber: string): Promise<Partial<IAdmin | null>>
+  isAdminExist(phoneNumber: string): Promise<Partial<IAdmin | null>>
   isPasswordMatched(
     givenPassword: string,
     savedPassword: string | undefined

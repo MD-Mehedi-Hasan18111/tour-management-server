@@ -42,7 +42,10 @@ const createOrder = (orderData) => __awaiter(void 0, void 0, void 0, function* (
         yield auth_model_1.default.updateOne({ _id: orderData.buyer }, { $inc: { budget: -choosedCow.price } });
         // Update the seller's income by adding the price of the cow
         yield auth_model_1.default.updateOne({ _id: choosedCow.seller }, { $inc: { income: choosedCow.price } });
-        orderResponse = yield (yield (yield order_model_1.Order.create(orderData)).populate('cow')).populate('buyer');
+        orderResponse = yield (yield (yield order_model_1.Order.create(orderData)).populate({
+            path: 'cow',
+            populate: [{ path: 'seller', model: 'Users' }],
+        })).populate('buyer');
         // Commit the transaction
         session.commitTransaction();
         session.endSession();
@@ -56,16 +59,61 @@ const createOrder = (orderData) => __awaiter(void 0, void 0, void 0, function* (
     return orderResponse;
 });
 exports.createOrder = createOrder;
-const getAllOrder = () => __awaiter(void 0, void 0, void 0, function* () {
-    const orders = yield order_model_1.Order.find()
+const getAllOrder = (user) => __awaiter(void 0, void 0, void 0, function* () {
+    let query = {};
+    if ((user === null || user === void 0 ? void 0 : user.role) == 'admin') {
+        query = {};
+    }
+    else if ((user === null || user === void 0 ? void 0 : user.role) == 'seller' || (user === null || user === void 0 ? void 0 : user.role) == 'buyer') {
+        if ((user === null || user === void 0 ? void 0 : user.role) == 'buyer') {
+            query = { buyer: user === null || user === void 0 ? void 0 : user.id };
+        }
+        else if ((user === null || user === void 0 ? void 0 : user.role) == 'seller') {
+            const sellerCows = yield cow_model_1.Cow.find({ seller: user === null || user === void 0 ? void 0 : user.id }, '_id').lean();
+            query = { cow: { $in: sellerCows.map(cow => cow._id) } };
+        }
+    }
+    const orders = yield order_model_1.Order.find(query)
         .sort({ createdAt: -1 })
-        .populate('cow')
+        .populate({
+        path: 'cow',
+        populate: [{ path: 'seller', model: 'Users' }],
+    })
         .populate('buyer');
     return orders;
 });
 exports.getAllOrder = getAllOrder;
-const getOneOrder = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    const order = yield order_model_1.Order.findById(id).populate('cow').populate('buyer');
+const getOneOrder = (id, user) => __awaiter(void 0, void 0, void 0, function* () {
+    let query = {};
+    if ((user === null || user === void 0 ? void 0 : user.role) == 'admin') {
+        query = { _id: id };
+    }
+    else if ((user === null || user === void 0 ? void 0 : user.role) == 'buyer') {
+        // validation buyer
+        const order = yield order_model_1.Order.findOne({ _id: id });
+        if ((order === null || order === void 0 ? void 0 : order.buyer) !== (user === null || user === void 0 ? void 0 : user.id)) {
+            throw new ApiError_1.default(http_status_1.default.FORBIDDEN, 'You are not authorized for this order');
+        }
+        query = { _id: id, buyer: user === null || user === void 0 ? void 0 : user.id };
+    }
+    else if ((user === null || user === void 0 ? void 0 : user.role) == 'seller') {
+        // validation seller
+        const sellerCows = yield cow_model_1.Cow.find({ seller: user === null || user === void 0 ? void 0 : user.id }, '_id').lean();
+        query = { _id: id, cow: { $in: sellerCows.map(cow => cow._id) } };
+        const order = yield order_model_1.Order.findOne(query);
+        if (!order) {
+            throw new ApiError_1.default(http_status_1.default.FORBIDDEN, 'You are not authorized for this order');
+        }
+    }
+    const order = yield order_model_1.Order.findOne(query)
+        .populate({
+        path: 'cow',
+        populate: [{ path: 'seller', model: 'Users' }],
+    })
+        .populate('buyer');
+    if (!order) {
+        throw new ApiError_1.default(http_status_1.default.BAD_REQUEST, 'Order Not Found!');
+    }
     return order;
 });
 exports.getOneOrder = getOneOrder;

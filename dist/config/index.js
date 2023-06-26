@@ -11,4 +11,11 @@ exports.default = {
     env: process.env.NODE_ENV,
     port: process.env.PORT,
     database_url: process.env.DATABASE_URL,
+    bcrypt_password_salt: process.env.BCRYPT_PASSWORD_SALT,
+    jwt: {
+        jwt_secret: process.env.JWT_SECRET,
+        jwt_expires_in: process.env.JWT_EXPIRES_IN,
+        jwt_refresh_secret: process.env.JWT_REFRESH_SECRET,
+        jwt_refresh_expires_in: process.env.JWT_REFRESH_EXPIRES_IN
+    }
 };

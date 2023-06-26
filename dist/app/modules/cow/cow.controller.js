@@ -18,11 +18,18 @@ const http_status_1 = __importDefault(require("http-status"));
 const pick_1 = __importDefault(require("../../../shared/pick"));
 const cow_constants_1 = require("./cow.constants");
 const cow_service_1 = require("./cow.service");
+const jwtTokenHelper_1 = require("../../../helpers/jwtTokenHelper");
+const config_1 = __importDefault(require("../../../config"));
+const ApiError_1 = __importDefault(require("../../../errors/ApiError"));
 const CreateCow = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const data = req.body;
-        const result = yield (0, cow_service_1.createCow)(data);
-        console.log(result);
+        const token = req.headers.authorization;
+        if (!token) {
+            throw new ApiError_1.default(http_status_1.default.FORBIDDEN, 'You are not authorized to create new cow');
+        }
+        const verifiedUser = (0, jwtTokenHelper_1.verifyToken)(token, config_1.default.jwt.jwt_secret);
+        const result = yield (0, cow_service_1.createCow)(data, verifiedUser);
         (0, sendResponse_1.default)(res, {
             statusCode: http_status_1.default.OK,
             success: true,
@@ -78,9 +85,14 @@ const GetSingleCow = (req, res, next) => __awaiter(void 0, void 0, void 0, funct
 exports.GetSingleCow = GetSingleCow;
 const UpdateCow = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const id = req.params.id;
+        const cowid = req.params.id;
+        const authToken = req.headers.authorization;
+        if (!authToken) {
+            throw new ApiError_1.default(http_status_1.default.FORBIDDEN, 'You are not authorized');
+        }
+        const verifiedUser = (0, jwtTokenHelper_1.verifyToken)(authToken, config_1.default.jwt.jwt_secret);
         const data = req.body;
-        const result = yield (0, cow_service_1.updateCow)(id, data);
+        const result = yield (0, cow_service_1.updateCow)(cowid, verifiedUser, data);
         (0, sendResponse_1.default)(res, {
             statusCode: http_status_1.default.OK,
             success: true,
@@ -96,7 +108,12 @@ exports.UpdateCow = UpdateCow;
 const DeleteCow = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const id = req.params.id;
-        const result = yield (0, cow_service_1.deleteCow)(id);
+        const authToken = req.headers.authorization;
+        if (!authToken) {
+            throw new ApiError_1.default(http_status_1.default.FORBIDDEN, 'You are not authorized');
+        }
+        const verifiedUser = (0, jwtTokenHelper_1.verifyToken)(authToken, config_1.default.jwt.jwt_secret);
+        const result = yield (0, cow_service_1.deleteCow)(id, verifiedUser);
         (0, sendResponse_1.default)(res, {
             statusCode: http_status_1.default.OK,
             success: true,

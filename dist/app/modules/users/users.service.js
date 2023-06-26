@@ -23,10 +23,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteUser = exports.updateUser = exports.getSingleUser = exports.getAllUsers = void 0;
+exports.updateUserProfileInfo = exports.getUserProfileInfo = exports.deleteUser = exports.updateUser = exports.getSingleUser = exports.getAllUsers = void 0;
 const http_status_1 = __importDefault(require("http-status"));
 const ApiError_1 = __importDefault(require("../../../errors/ApiError"));
 const auth_model_1 = __importDefault(require("../auth/auth.model"));
+const bcrypt_1 = __importDefault(require("bcrypt"));
+const config_1 = __importDefault(require("../../../config"));
 const getAllUsers = () => __awaiter(void 0, void 0, void 0, function* () {
     const users = yield auth_model_1.default.find({}).sort({ createdAt: -1 });
     return users;
@@ -42,7 +44,7 @@ const updateUser = (id, userUpdateData) => __awaiter(void 0, void 0, void 0, fun
     if (!FoundUser) {
         throw new ApiError_1.default(http_status_1.default.BAD_REQUEST, 'User not found');
     }
-    const { name } = userUpdateData, userData = __rest(userUpdateData, ["name"]);
+    const { name, password } = userUpdateData, userData = __rest(userUpdateData, ["name", "password"]);
     const updateUserData = Object.assign({}, userData);
     // handle name
     if (name && Object.keys(name).length > 0) {
@@ -50,6 +52,10 @@ const updateUser = (id, userUpdateData) => __awaiter(void 0, void 0, void 0, fun
             const nameKey = `name.${key}`;
             updateUserData[nameKey] = name[key];
         });
+    }
+    // handle password
+    if (password) {
+        userUpdateData['password'] = yield bcrypt_1.default.hash(password, Number(config_1.default.bcrypt_password_salt));
     }
     const result = yield auth_model_1.default.findOneAndUpdate({ _id: id }, userUpdateData, {
         new: true,
@@ -62,3 +68,32 @@ const deleteUser = (id) => __awaiter(void 0, void 0, void 0, function* () {
     return result;
 });
 exports.deleteUser = deleteUser;
+const getUserProfileInfo = (user) => __awaiter(void 0, void 0, void 0, function* () {
+    const userInfo = yield auth_model_1.default.findOne({ _id: user === null || user === void 0 ? void 0 : user.id, role: user === null || user === void 0 ? void 0 : user.role });
+    return userInfo;
+});
+exports.getUserProfileInfo = getUserProfileInfo;
+const updateUserProfileInfo = (userUpdateData, user) => __awaiter(void 0, void 0, void 0, function* () {
+    const FoundUser = yield auth_model_1.default.findOne({ _id: user === null || user === void 0 ? void 0 : user.id });
+    if (!FoundUser) {
+        throw new ApiError_1.default(http_status_1.default.BAD_REQUEST, 'Profile not found');
+    }
+    const { name, password } = userUpdateData, userData = __rest(userUpdateData, ["name", "password"]);
+    const updateUserData = Object.assign({}, userData);
+    // handle name
+    if (name && Object.keys(name).length > 0) {
+        Object.keys(name).forEach(key => {
+            const nameKey = `name.${key}`;
+            updateUserData[nameKey] = name[key];
+        });
+    }
+    // handle password
+    if (password) {
+        userUpdateData['password'] = yield bcrypt_1.default.hash(password, Number(config_1.default.bcrypt_password_salt));
+    }
+    const result = yield auth_model_1.default.findOneAndUpdate({ _id: user === null || user === void 0 ? void 0 : user.id }, userUpdateData, {
+        new: true,
+    });
+    return result;
+});
+exports.updateUserProfileInfo = updateUserProfileInfo;

@@ -23,19 +23,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.NewTokenGenerate = exports.LoginUser = exports.CreateUser = void 0;
+exports.LoginAdmin = exports.CreateAdmin = void 0;
 const sendResponse_1 = __importDefault(require("../../../shared/sendResponse"));
 const http_status_1 = __importDefault(require("http-status"));
-const auth_service_1 = require("./auth.service");
+const admin_service_1 = require("./admin.service");
 const config_1 = __importDefault(require("../../../config"));
-const CreateUser = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+const CreateAdmin = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const data = __rest(req.body, []);
-        const result = yield (0, auth_service_1.createUser)(data);
+        const result = yield (0, admin_service_1.createAdmin)(data);
         (0, sendResponse_1.default)(res, {
             statusCode: http_status_1.default.OK,
             success: true,
-            message: 'User sign up successfully',
+            message: 'Admin created successfully',
             data: result,
         });
     }
@@ -43,11 +43,11 @@ const CreateUser = (req, res, next) => __awaiter(void 0, void 0, void 0, functio
         next(error);
     }
 });
-exports.CreateUser = CreateUser;
-const LoginUser = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+exports.CreateAdmin = CreateAdmin;
+const LoginAdmin = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const data = __rest(req.body, []);
-        const result = yield (0, auth_service_1.loginUser)(data);
+        const result = yield (0, admin_service_1.loginAdmin)(data);
         // set refresh token into cookie
         const { refreshToken } = result, others = __rest(result, ["refreshToken"]);
         const cookieOptions = {
@@ -58,7 +58,7 @@ const LoginUser = (req, res, next) => __awaiter(void 0, void 0, void 0, function
         (0, sendResponse_1.default)(res, {
             statusCode: http_status_1.default.OK,
             success: true,
-            message: 'User logged in successfully',
+            message: 'Admin logged in successfully',
             data: others,
         });
     }
@@ -66,25 +66,4 @@ const LoginUser = (req, res, next) => __awaiter(void 0, void 0, void 0, function
         next(error);
     }
 });
-exports.LoginUser = LoginUser;
-const NewTokenGenerate = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const { refreshToken } = req.cookies;
-        const result = yield (0, auth_service_1.newTokenGenerate)(refreshToken);
-        const cookieOptions = {
-            secure: config_1.default.env === 'production',
-            httpOnly: true,
-        };
-        res.cookie('refreshToken', refreshToken, cookieOptions);
-        (0, sendResponse_1.default)(res, {
-            statusCode: http_status_1.default.OK,
-            success: true,
-            message: 'New access token generated successfully!',
-            data: result,
-        });
-    }
-    catch (error) {
-        next(error);
-    }
-});
-exports.NewTokenGenerate = NewTokenGenerate;
+exports.LoginAdmin = LoginAdmin;

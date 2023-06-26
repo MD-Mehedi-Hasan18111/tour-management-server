@@ -30,13 +30,17 @@ const paginationHelper_1 = __importDefault(require("../../../helpers/paginationH
 const cow_model_1 = require("./cow.model");
 const cow_constants_1 = require("./cow.constants");
 const auth_model_1 = __importDefault(require("../auth/auth.model"));
-const createCow = (cowData) => __awaiter(void 0, void 0, void 0, function* () {
+const createCow = (cowData, user) => __awaiter(void 0, void 0, void 0, function* () {
     const FoundSeller = yield auth_model_1.default.findOne({
         _id: cowData.seller,
         role: 'seller',
     });
     if (!FoundSeller) {
         throw new ApiError_1.default(http_status_1.default.BAD_REQUEST, 'Seller not found');
+    }
+    // validation seller
+    if ((cowData === null || cowData === void 0 ? void 0 : cowData.seller) !== user.id) {
+        throw new ApiError_1.default(http_status_1.default.FORBIDDEN, 'You are not authorized to create cow for other seller');
     }
     const newCow = yield (yield cow_model_1.Cow.create(cowData)).populate('seller');
     if (!newCow) {
@@ -108,8 +112,8 @@ const getOneCow = (id) => __awaiter(void 0, void 0, void 0, function* () {
     return result;
 });
 exports.getOneCow = getOneCow;
-const updateCow = (id, payload) => __awaiter(void 0, void 0, void 0, function* () {
-    const isExist = yield cow_model_1.Cow.findOne({ _id: id });
+const updateCow = (id, verifiedUser, payload) => __awaiter(void 0, void 0, void 0, function* () {
+    const isExist = yield cow_model_1.Cow.findOne({ _id: id, seller: verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.id });
     if (!isExist) {
         throw new ApiError_1.default(http_status_1.default.BAD_REQUEST, 'Cow could not found');
     }
@@ -119,8 +123,8 @@ const updateCow = (id, payload) => __awaiter(void 0, void 0, void 0, function* (
     return result;
 });
 exports.updateCow = updateCow;
-const deleteCow = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    const isFoundCow = yield cow_model_1.Cow.findOne({ _id: id });
+const deleteCow = (id, verifiedUser) => __awaiter(void 0, void 0, void 0, function* () {
+    const isFoundCow = yield cow_model_1.Cow.findOne({ _id: id, seller: verifiedUser === null || verifiedUser === void 0 ? void 0 : verifiedUser.id });
     if (!isFoundCow) {
         throw new ApiError_1.default(http_status_1.default.BAD_REQUEST, 'Cow could not found');
     }
