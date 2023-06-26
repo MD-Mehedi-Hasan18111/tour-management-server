@@ -1,13 +1,16 @@
-## Server Live Link: https://cow-market.vercel.app
+## Server Live Link: https://digital-cow-market.vercel.app
 
-## Application Routes
+# Application Routes:
+## Main Part
+--------------------------------------------------------------------------------------------------------------------
+## Auth (Users)
+- Route: https://digital-cow-market.vercel.app/api/v1/auth/signup (POST)
+- Route: https://digital-cow-market.vercel.app/api/v1/auth/login (POST)
+- Route: https://digital-cow-market.vercel.app/api/v1/auth/refresh-token (POST)
 
-## Users
-- /api/v1/auth/signup (POST)
-- /api/v1/users (GET)
-- /api/v1/users/648c36a7eb65b96fa7379713 (GET)
-- /api/v1/users/648c36a7eb65b96fa7379713 (PATCH)
-- /api/v1/users/648c36a7eb65b96fa7379713 (DELETE)
+## Auth (Admin)
+- Route: https://digital-cow-market.vercel.app/api/v1/admins/create-admin (POST)
+- Route: https://digital-cow-market.vercel.app/api/v1/admins/login (POST)
 
 ## Cows
 - /api/v1/cows (POST)
