@@ -16,6 +16,14 @@ router.post(
 
 router.get('/:id', GetSingleOrder)
 
-router.get('/', GetAllOrder)
+router.get(
+  '/',
+  authorization(
+    ENUM_USER_ROLE.ADMIN,
+    ENUM_USER_ROLE.BUYER,
+    ENUM_USER_ROLE.SELLER
+  ),
+  GetAllOrder
+)
 
 export const OrderRoutes = router

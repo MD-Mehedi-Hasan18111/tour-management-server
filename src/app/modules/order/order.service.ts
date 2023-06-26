@@ -5,6 +5,7 @@ import { IOrder } from './order.interface'
 import User from '../auth/auth.model'
 import mongoose from 'mongoose'
 import { Order } from './order.model'
+import { JwtPayload } from 'jsonwebtoken'
 
 export const createOrder = async (
   orderData: IOrder
@@ -65,15 +66,39 @@ export const createOrder = async (
   return orderResponse
 }
 
-export const getAllOrder = async (): Promise<IOrder[]> => {
-  const orders = await Order.find()
+export const getAllOrder = async (user: JwtPayload): Promise<IOrder[]> => {
+  let query = {}
+  if (user?.role == 'admin') {
+    query = {}
+  } else if (user?.role == 'seller' || user?.role == 'buyer') {
+    if (user?.role == 'buyer') {
+      query = { buyer: user?.id }
+    } else if (user?.role == 'seller') {
+      const sellerCows = await Cow.find({ seller: user?.id }, '_id').lean()
+      query = { cow: { $in: sellerCows.map(cow => cow._id) } }
+    }
+  }
+  const orders = await Order.find(query)
     .sort({ createdAt: -1 })
     .populate('cow')
     .populate('buyer')
   return orders
 }
 
-export const getOneOrder = async (id: string): Promise<IOrder | null> => {
-  const order = await Order.findById(id).populate('cow').populate('buyer')
+export const getOneOrder = async (
+  id: string,
+  user: JwtPayload
+): Promise<IOrder | null> => {
+  let query = {}
+  if (user?.role == 'admin') {
+    query = { _id: id }
+  } else if (user?.role == 'buyer') {
+    query = { _id: id, buyer: user?.id }
+  } else if (user?.role == 'seller') {
+    const sellerCows = await Cow.find({ seller: user?.id }, '_id').lean()
+    query = { _id: id, cow: { $in: sellerCows.map(cow => cow._id) } }
+  }
+
+  const order = await Order.findOne(query).populate('cow').populate('buyer')
   return order
 }
