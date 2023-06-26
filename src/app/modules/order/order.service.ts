@@ -50,7 +50,12 @@ export const createOrder = async (
     )
 
     orderResponse = await (
-      await (await Order.create(orderData)).populate('cow')
+      await (
+        await Order.create(orderData)
+      ).populate({
+        path: 'cow',
+        populate: [{ path: 'seller', model: 'Users' }],
+      })
     ).populate('buyer')
 
     // Commit the transaction
@@ -80,7 +85,10 @@ export const getAllOrder = async (user: JwtPayload): Promise<IOrder[]> => {
   }
   const orders = await Order.find(query)
     .sort({ createdAt: -1 })
-    .populate('cow')
+    .populate({
+      path: 'cow',
+      populate: [{ path: 'seller', model: 'Users' }],
+    })
     .populate('buyer')
   return orders
 }
@@ -115,6 +123,16 @@ export const getOneOrder = async (
     }
   }
 
-  const order = await Order.findOne(query).populate('cow').populate('buyer')
+  const order = await Order.findOne(query)
+    .populate({
+      path: 'cow',
+      populate: [{ path: 'seller', model: 'Users' }],
+    })
+    .populate('buyer')
+
+  if (!order) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Order Not Found!')
+  }
+
   return order
 }
