@@ -93,10 +93,26 @@ export const getOneOrder = async (
   if (user?.role == 'admin') {
     query = { _id: id }
   } else if (user?.role == 'buyer') {
+    // validation buyer
+    const order = await Order.findOne({ _id: id })
+    if (order?.buyer !== user?.id) {
+      throw new ApiError(
+        httpStatus.FORBIDDEN,
+        'You are not authorized for this order'
+      )
+    }
     query = { _id: id, buyer: user?.id }
   } else if (user?.role == 'seller') {
+    // validation seller
     const sellerCows = await Cow.find({ seller: user?.id }, '_id').lean()
     query = { _id: id, cow: { $in: sellerCows.map(cow => cow._id) } }
+    const order = await Order.findOne(query)
+    if (!order) {
+      throw new ApiError(
+        httpStatus.FORBIDDEN,
+        'You are not authorized for this order'
+      )
+    }
   }
 
   const order = await Order.findOne(query).populate('cow').populate('buyer')

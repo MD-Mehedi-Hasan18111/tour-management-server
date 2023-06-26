@@ -9,7 +9,7 @@ import { searchAbleFiltersFields } from './cow.constants'
 import User from '../auth/auth.model'
 import { JwtPayload } from 'jsonwebtoken'
 
-export const createCow = async (cowData: ICow): Promise<ICow | null> => {
+export const createCow = async (cowData: ICow, user: JwtPayload): Promise<ICow | null> => {
   const FoundSeller = await User.findOne({
     _id: cowData.seller,
     role: 'seller',
@@ -17,6 +17,14 @@ export const createCow = async (cowData: ICow): Promise<ICow | null> => {
   if (!FoundSeller) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Seller not found')
   }
+
+  // validation seller
+  if (cowData?.seller !== user.id) {
+      throw new ApiError(
+        httpStatus.FORBIDDEN,
+        'You are not authorized to create cow for other seller'
+      )
+    }
 
   const newCow = await (await Cow.create(cowData)).populate('seller')
   if (!newCow) {

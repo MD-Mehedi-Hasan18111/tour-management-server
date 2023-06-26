@@ -18,7 +18,16 @@ import ApiError from '../../../errors/ApiError'
 export const CreateCow: RequestHandler = async (req, res, next) => {
   try {
     const data = req.body
-    const result = await createCow(data)
+    const token = req.headers.authorization
+    if (!token) {
+      throw new ApiError(
+        httpStatus.FORBIDDEN,
+        'You are not authorized to create new cow'
+      )
+    }
+    const verifiedUser = verifyToken(token, config.jwt.jwt_secret as Secret)
+
+    const result = await createCow(data, verifiedUser)
     sendResponse(res, {
       statusCode: httpStatus.OK,
       success: true,
