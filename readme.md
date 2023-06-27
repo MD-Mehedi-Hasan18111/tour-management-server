@@ -12,19 +12,18 @@
 - Route: https://digital-cow-market.vercel.app/api/v1/admins/create-admin (POST)
 - Route: https://digital-cow-market.vercel.app/api/v1/admins/login (POST)
 
-## Cows
-- /api/v1/cows (POST)
-- /api/v1/cows (GET)
-- /api/v1/cows/648dba83f2bfbbf7c362505d (GET)
-- /api/v1/cows/648dba83f2bfbbf7c362505d (PATCH)
-- /api/v1/cows/648c465979478036af592bea (DELETE)
+## User
+- Route: https://digital-cow-market.vercel.app/api/v1/users (GET)
+- Route: https://digital-cow-market.vercel.app/api/v1/users/6495e48400712f943c7b46a7 (Single User GET)
+- Route: https://digital-cow-market.vercel.app/api/v1/users/6495e48400712f943c7b46a7 (PATCH)
+- Route: https://digital-cow-market.vercel.app/api/v1/users/6495e48400712f943c7b46a7 (DELETE)
 
-## Pagination and Filtering routes of Cows
-- /api/v1/cows?page=1&limit=10 (GET)
-- /api/v1/cows?sortBy=price&sortOrder=asc (GET)
-- /api/v1/cows?minPrice=20000&maxPrice=70000 (GET)
-- /api/v1/cows?location=Chattogram (GET)
-- /api/v1/cows?searchTerm=Cha (GET)
+## Cows
+- Route: https://digital-cow-market.vercel.app/api/v1/cows (POST)
+- Route: https://digital-cow-market.vercel.app/api/v1/cows (GET)
+- Route: https://digital-cow-market.vercel.app/api/v1/cows/649971f5e8e284fe7820b0b9 (GET)
+- Route: https://digital-cow-market.vercel.app/api/v1/cows/649971f5e8e284fe7820b0b9 (PATCH)
+- Route: https://digital-cow-market.vercel.app/api/v1/cows/649971f5e8e284fe7820b0b9 (DELETE)
 
 ## Orders
 - /api/v1/orders (POST)
