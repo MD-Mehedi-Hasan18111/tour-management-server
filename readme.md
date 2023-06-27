@@ -25,7 +25,15 @@
 - Route: https://digital-cow-market.vercel.app/api/v1/cows/649971f5e8e284fe7820b0b9 (PATCH)
 - Route: https://digital-cow-market.vercel.app/api/v1/cows/649971f5e8e284fe7820b0b9 (DELETE)
 
-## Orders
-- /api/v1/orders (POST)
-- /api/v1/orders (GET)
-- /api/v1/orders/648c92e09dbe70f989ee9d25 (GET)
+## Order
+- Route: https://digital-cow-market.vercel.app/api/v1/orders (POST)
+- Route: https://digital-cow-market.vercel.app/api/v1/orders (GET)
+
+## Bonus Part
+--------------------------------------------------------------------------------------------------------------------
+## My Profile
+- Route: https://digital-cow-market.vercel.app/api/v1/users/my-profile (GET)
+- Route: https://digital-cow-market.vercel.app/api/v1/users/my-profile (PATCh)
+
+## Order
+- Route: https://digital-cow-market.vercel.app/api/v1/orders/64987df1006894426e87875e (GET)
