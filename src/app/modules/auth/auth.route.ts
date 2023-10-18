@@ -1,26 +1,10 @@
 import express from 'express'
-import validateRequest from '../../../middlewares/validateRequest'
+import { LoginUser } from './auth.controller'
 import { authValidation } from './auth.validation'
-import { CreateUser, LoginUser, NewTokenGenerate } from './auth.controller'
+import validateRequest from '../../../middlewares/validateRequest'
 
 const router = express.Router()
 
-router.post(
-  '/signup',
-  validateRequest(authValidation.createUserZodSchema),
-  CreateUser
-)
-
-router.post(
-  '/login',
-  validateRequest(authValidation.loginUserZodSchema),
-  LoginUser
-)
-
-router.post(
-  '/refresh-token',
-  validateRequest(authValidation.newTokenZodSchema),
-  NewTokenGenerate
-)
+router.post('/login', validateRequest(authValidation.loginZodSchema), LoginUser)
 
 export const AuthRoutes = router

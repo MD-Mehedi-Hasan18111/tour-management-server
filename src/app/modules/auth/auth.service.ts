@@ -1,113 +1,38 @@
 import httpStatus from 'http-status'
-import User from './auth.model'
 import ApiError from '../../../errors/ApiError'
-import { IUser, IUserCredential } from './auth.interface'
-import { Secret } from 'jsonwebtoken'
+import User from '../user/user.model'
+import { ILoginCredential } from './auth.interface'
+import { CreateToken } from '../../../helpers/jwtTokenHelper'
 import config from '../../../config'
-import { CreateToken, verifyToken } from '../../../helpers/jwtTokenHelper'
+import { Secret } from 'jsonwebtoken'
 
-export const createUser = async (userData: IUser): Promise<IUser | null> => {
-  // check budget and income with role
-  if (
-    userData.role == 'buyer' &&
-    (!userData.budget || userData.budget) &&
-    userData.income > 0
-  ) {
-    throw new ApiError(
-      httpStatus.BAD_REQUEST,
-      'Invalid Buyer Data, Required Budget! Income not allowed for Buyer'
-    )
-  } else if (
-    userData.role == 'seller' &&
-    (!userData.income || userData.income) &&
-    userData.budget > 0
-  ) {
-    throw new ApiError(
-      httpStatus.BAD_REQUEST,
-      'Invalid Seller Data, Required Income! Budget not allowed for Seller'
-    )
-  }
-
-  // set initial budget and income role wise
-  if (userData.role == 'buyer' && !userData.income) {
-    userData.income = 0
-    if (!userData.budget) {
-      userData.budget = 0
-    }
-  } else if (userData.role == 'seller' && !userData.budget) {
-    userData.budget = 0
-    if (!userData.income) {
-      userData.income = 0
-    }
-  }
-
-  const user = await User.create(userData)
-
-  return user
-}
-
-export const loginUser = async (payload: IUserCredential) => {
-  const { phoneNumber, password } = payload
+export const loginUser = async (payload: ILoginCredential) => {
+  const { email, password } = payload
   const user = new User()
-  const isUserExist = await user.isUserExist(phoneNumber)
-  // phone number if not found
+
+  const isUserExist = await user.isUserExist(email)
+  let isPasswordMatch = null
   if (!isUserExist) {
-    throw new ApiError(
-      httpStatus.BAD_REQUEST,
-      'User does not exist with this phone number'
+    throw new ApiError(httpStatus.NOT_FOUND, 'User does not exist')
+  } else {
+    isPasswordMatch = await user.isPasswordMatched(
+      password,
+      isUserExist.password as string
     )
   }
 
-  // password if not matched
-  const isMatched = await user.isPasswordMatched(password, isUserExist.password)
-  if (isUserExist.password && !isMatched) {
+  if (isUserExist.password && !isPasswordMatch) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Password is incorrect')
   }
 
-  // create access token
+  // create access token & refresh token
   const accessToken = CreateToken(
-    { id: isUserExist._id, role: isUserExist.role },
+    { userId: isUserExist.email, role: isUserExist.role },
     config.jwt.jwt_secret as Secret,
     config.jwt.jwt_expires_in as string
-  )
-
-  const refreshToken = CreateToken(
-    { id: isUserExist._id, role: isUserExist.role },
-    config.jwt.jwt_refresh_secret as Secret,
-    config.jwt.jwt_refresh_expires_in as string
   )
 
   return {
     accessToken: accessToken,
-    refreshToken: refreshToken,
-  }
-}
-
-export const newTokenGenerate = async (token: string) => {
-  let verifiedToken = null
-  try {
-    verifiedToken = verifyToken(token, config.jwt.jwt_refresh_secret as Secret)
-  } catch (error) {
-    throw new ApiError(httpStatus.FORBIDDEN, 'Invalid Refresh Token')
-  }
-
-  const { id } = verifiedToken
-
-  const isUserExist = await User.findById(id)
-  if (!isUserExist) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'User does not exist')
-  }
-
-  // generate new access token
-  const newAccessToken = CreateToken(
-    {
-      id: isUserExist._id,
-      role: isUserExist.role,
-    },
-    config.jwt.jwt_secret as Secret,
-    config.jwt.jwt_expires_in as string
-  )
-  return {
-    accessToken: newAccessToken,
   }
 }

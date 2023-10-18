@@ -1,17 +1,16 @@
 import { RequestHandler } from 'express'
-import { loginUser } from './auth.service'
 import sendResponse from '../../../shared/sendResponse'
 import httpStatus from 'http-status'
+import { signupUser } from './user.service'
 
-export const LoginUser: RequestHandler = async (req, res, next) => {
+export const SignUp: RequestHandler = async (req, res, next) => {
   try {
-    const data = req.body
-    const result = await loginUser(data)
-
+    const user = req.body
+    const result = await signupUser(user)
     sendResponse(res, {
       statusCode: httpStatus.OK,
       success: true,
-      message: 'User logged in successfully',
+      message: 'user signed up successfully',
       data: result,
     })
   } catch (error) {

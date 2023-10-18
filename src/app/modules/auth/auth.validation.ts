@@ -1,41 +1,20 @@
 import { z } from 'zod'
-import { role } from './auth.constants'
 
-const createUserZodSchema = z.object({
+const loginZodSchema = z.object({
   body: z.object({
-    phoneNumber: z.string({ required_error: 'Phone number is required' }),
-    role: z.enum([...role] as [string, ...string[]], {
-      required_error: 'role is required',
-    }),
-    password: z.string({ required_error: 'password is required' }),
-    name: z.object(
-      {
-        firstName: z.string({ required_error: 'first name is required' }),
-        lastName: z.string({ required_error: 'last name is required' }),
-      },
-      { required_error: 'User name is required' }
-    ),
-    address: z.string({ required_error: 'Address is required' }),
-    budget: z.number().optional(),
-    income: z.number().optional(),
-  }),
-})
-
-const loginUserZodSchema = z.object({
-  body: z.object({
-    phoneNumber: z.string({ required_error: 'Phone number is required' }),
+    email: z.string({ required_error: 'Email is required' }),
     password: z.string({ required_error: 'Password is required' }),
   }),
 })
 
-const newTokenZodSchema = z.object({
-  cookies: z.object({
-    refreshToken: z.string({ required_error: 'refresh token is required' }),
+const changePasswordZodSchema = z.object({
+  body: z.object({
+    oldPassword: z.string({ required_error: 'Old password is required' }),
+    newPassword: z.string({ required_error: 'New password is required' }),
   }),
 })
 
 export const authValidation = {
-  createUserZodSchema,
-  loginUserZodSchema,
-  newTokenZodSchema,
+  loginZodSchema,
+  changePasswordZodSchema,
 }
