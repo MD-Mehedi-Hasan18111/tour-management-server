@@ -8,7 +8,7 @@ const userSchema = new Schema<IUser, Record<string, never>, UserModel>(
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
     email: { type: String, required: true, unique: true },
-    gender: { type: String, required: true },
+    gender: { type: String, required: true, enum: ['male', 'female'] },
     mobileCode: { type: String, required: true },
     phoneNumber: { type: String, required: true },
     password: { type: String, required: true, select: 0 },
@@ -19,6 +19,10 @@ const userSchema = new Schema<IUser, Record<string, never>, UserModel>(
     timestamps: true,
     toJSON: {
       virtuals: true,
+      transform: function (doc, ret) {
+        delete ret.password
+        return ret
+      },
     },
   }
 )

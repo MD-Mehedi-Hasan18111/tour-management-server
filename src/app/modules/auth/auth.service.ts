@@ -29,7 +29,11 @@ export const loginUser = async (payload: ILoginCredential) => {
 
   // create access token & refresh token
   const accessToken = CreateToken(
-    { userId: isUserExist.email, role: isUserExist.role },
+    {
+      userId: isUserExist?._id,
+      email: isUserExist.email,
+      role: isUserExist.role,
+    },
     config.jwt.jwt_secret as Secret,
     config.jwt.jwt_expires_in as string
   )
@@ -45,6 +49,10 @@ export const changePassword = async (
 ): Promise<IUser | null> => {
   const { oldPassword, newPassword } = payload
   const user = new User()
+
+  if (!userData) {
+    throw new ApiError(httpStatus.UNAUTHORIZED, 'User not authorized')
+  }
 
   const isUserExist = await user.isUserExist(userData?.email)
   let isPasswordMatch = null
