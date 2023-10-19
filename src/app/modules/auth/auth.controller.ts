@@ -2,8 +2,7 @@ import { RequestHandler } from 'express'
 import { changePassword, loginUser } from './auth.service'
 import sendResponse from '../../../shared/sendResponse'
 import httpStatus from 'http-status'
-import { verifyToken } from '../../../helpers/jwtTokenHelper'
-import config from '../../../config'
+import { getTokenData } from '../user/user.utils'
 
 export const LoginUser: RequestHandler = async (req, res, next) => {
   try {
@@ -25,10 +24,7 @@ export const ChangePassword: RequestHandler = async (req, res, next) => {
   try {
     const data = req.body
     const token = req.headers.authorization
-    let user = null
-    if (token) {
-      user = verifyToken(token, config.jwt.jwt_secret as string)
-    }
+    const user = getTokenData(token as string)
 
     const result = await changePassword(user, data)
 

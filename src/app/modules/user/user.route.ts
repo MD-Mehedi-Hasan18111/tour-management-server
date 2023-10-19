@@ -1,5 +1,5 @@
 import express from 'express'
-import { SignUp } from './user.controller'
+import { GetUserProfile, SignUp, UpdateUserProfile } from './user.controller'
 import validateRequest from '../../../middlewares/validateRequest'
 import { userValidation } from './user.validation'
 
@@ -10,5 +10,13 @@ router.post(
   validateRequest(userValidation.createUserZodSchema),
   SignUp
 )
+
+router.patch(
+  '/profile',
+  validateRequest(userValidation.updateUserZodSchema),
+  UpdateUserProfile
+)
+
+router.get('/profile', GetUserProfile)
 
 export const UserRoutes = router

@@ -11,6 +11,7 @@ export type IUser = {
   phoneNumber: string
   password: string
   role: string
+  status?: 'active' | 'deactive'
   profileImage?: string
 }
 

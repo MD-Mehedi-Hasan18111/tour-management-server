@@ -13,6 +13,7 @@ const userSchema = new Schema<IUser, Record<string, never>, UserModel>(
     phoneNumber: { type: String, required: true },
     password: { type: String, required: true, select: 0 },
     role: { type: String, default: 'user' },
+    status: { type: String, default: 'active', enum: ['active', 'deactive'] },
     profileImage: { type: String },
   },
   {
