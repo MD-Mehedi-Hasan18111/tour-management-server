@@ -36,7 +36,14 @@ const updateUserZodSchema = z.object({
   }),
 })
 
+const updateUserStatusZodSchema = z.object({
+  body: z.object({
+    status: z.enum([...(['active', 'deactive'] as [string, ...string[]])]),
+  }),
+})
+
 export const userValidation = {
   createUserZodSchema,
   updateUserZodSchema,
+  updateUserStatusZodSchema,
 }

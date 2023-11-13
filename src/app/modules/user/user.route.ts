@@ -1,7 +1,16 @@
 import express from 'express'
-import { GetUserProfile, SignUp, UpdateUserProfile } from './user.controller'
+import {
+  GetAllUsers,
+  GetUserProfile,
+  RemoveUser,
+  SignUp,
+  UpdateUserProfile,
+  UpdateUserStatus,
+} from './user.controller'
 import validateRequest from '../../../middlewares/validateRequest'
 import { userValidation } from './user.validation'
+import { authorization } from '../../../middlewares/authorization'
+import { ENUM_USER_ROLE } from '../../../enums/userRole'
 
 const router = express.Router()
 
@@ -17,6 +26,17 @@ router.patch(
   UpdateUserProfile
 )
 
+router.patch(
+  '/update-status',
+  authorization(ENUM_USER_ROLE.ADMIN),
+  validateRequest(userValidation.updateUserStatusZodSchema),
+  UpdateUserStatus
+)
+
+router.delete('/remove-user', authorization(ENUM_USER_ROLE.ADMIN), RemoveUser)
+
 router.get('/profile', GetUserProfile)
+
+router.get('/', authorization(ENUM_USER_ROLE.ADMIN), GetAllUsers)
 
 export const UserRoutes = router

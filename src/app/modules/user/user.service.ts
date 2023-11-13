@@ -53,3 +53,52 @@ export const updateUserProfile = async (
 
   return userInfo
 }
+
+// Admins User manage APIs
+export const getAllUsers = async (
+  userData: JwtPayload | null
+): Promise<IUser[]> => {
+  if (!userData) {
+    throw new ApiError(httpStatus.UNAUTHORIZED, 'User not authorized')
+  }
+
+  const user = new User()
+
+  const isUserExist = await user.isUserExist(userData?.email)
+
+  if (!isUserExist) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'User not found')
+  } else {
+    const users = await User.find({ role: { $ne: 'admin' } })
+    return users
+  }
+}
+
+export const updateUserStatus = async (
+  userData: JwtPayload | null,
+  updateData: Partial<IUser>,
+  userId: string | undefined
+): Promise<IUser | null> => {
+  if (!userData) {
+    throw new ApiError(httpStatus.UNAUTHORIZED, 'User not authorized')
+  }
+
+  const userInfo = await User.findOneAndUpdate({ _id: userId }, updateData, {
+    new: true,
+  })
+
+  return userInfo
+}
+
+export const removeUser = async (
+  userData: JwtPayload | null,
+  userId: string | undefined
+): Promise<IUser | null> => {
+  if (!userData) {
+    throw new ApiError(httpStatus.UNAUTHORIZED, 'User not authorized')
+  }
+
+  const userInfo = await User.findOneAndDelete({ _id: userId })
+
+  return userInfo
+}
