@@ -38,8 +38,11 @@ export const loginUser = async (payload: ILoginCredential) => {
     config.jwt.jwt_expires_in as string
   )
 
+  const userData = await User.findOne({email: isUserExist?.email});
+
   return {
     accessToken: accessToken,
+    data: userData
   }
 }
 
