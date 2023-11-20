@@ -2,11 +2,26 @@ import httpStatus from 'http-status'
 import ApiError from '../../../errors/ApiError'
 import { IUser } from './user.interface'
 import User from './user.model'
-import { JwtPayload } from 'jsonwebtoken'
+import { JwtPayload, Secret } from 'jsonwebtoken'
+import config from '../../../config'
+import { CreateToken } from '../../../helpers/jwtTokenHelper'
 
-export const signupUser = async (userData: IUser): Promise<IUser | null> => {
+export const signupUser = async (userData: IUser) => {
   const newUser = await User.create(userData)
-  return newUser
+  // create access token & refresh token
+  const accessToken = CreateToken(
+    {
+      userId: newUser?._id,
+      email: newUser.email,
+      role: newUser.role,
+    },
+    config.jwt.jwt_secret as Secret,
+    config.jwt.jwt_expires_in as string
+  )
+  return {
+    accessToken: accessToken,
+    userData: newUser,
+  }
 }
 
 export const getUserProfile = async (

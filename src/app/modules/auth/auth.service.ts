@@ -42,7 +42,7 @@ export const loginUser = async (payload: ILoginCredential) => {
 
   return {
     accessToken: accessToken,
-    data: userData
+    userData: userData
   }
 }
 
